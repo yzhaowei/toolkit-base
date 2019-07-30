@@ -3,6 +3,7 @@ FROM rocker/geospatial:3.6.0
 ENV NB_USER rstudio
 ENV NB_UID 1000
 ENV VENV_DIR /srv/venv
+ENV SHELL /bin/bash
 
 # Set ENV for all programs...
 ENV PATH ${VENV_DIR}/bin:$PATH
@@ -27,6 +28,7 @@ RUN apt-get update && \
 RUN mkdir -p ${VENV_DIR} && chown -R ${NB_USER} ${VENV_DIR}
 
 USER ${NB_USER}
+
 RUN python3 -m venv ${VENV_DIR} && \
     # Explicitly install a new enough version of pip
     pip3 install pip==9.0.1 && \
@@ -36,12 +38,11 @@ RUN python3 -m venv ${VENV_DIR} && \
     jupyter nbextension install    --sys-prefix --py nbrsessionproxy && \
     jupyter nbextension enable     --sys-prefix --py nbrsessionproxy
 
-
 RUN R --quiet -e "devtools::install_github('IRkernel/IRkernel')" && \
     R --quiet -e "IRkernel::installspec(prefix='${VENV_DIR}')"
 
 EXPOSE 8888
-ENTRYPOINT ["jupyter", "lab", "--allow-root","--ip=0.0.0.0", "--no-browser"]
+ENTRYPOINT ["jupyter", "lab","--ip=0.0.0.0", "--no-browser"]
 
 
 ## If extending this image, remember to switch back to USER root to apt-get
