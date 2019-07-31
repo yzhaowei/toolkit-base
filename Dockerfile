@@ -42,7 +42,7 @@ RUN R --quiet -e "devtools::install_github('IRkernel/IRkernel')" && \
     R --quiet -e "IRkernel::installspec(prefix='${VENV_DIR}')"
 
 EXPOSE 8888
-ENTRYPOINT ["jupyter", "lab","--ip=0.0.0.0", "--no-browser"]
+CMD ["jupyter", "lab","--ip=0.0.0.0", "--no-browser"]
 
 
 ## If extending this image, remember to switch back to USER root to apt-get
