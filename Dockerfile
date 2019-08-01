@@ -21,7 +21,8 @@ RUN apt-get update && \
     apt-get -y install python3-venv python3-dev && \
     apt-get purge && \
     apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+    rm -rf /var/lib/apt/lists/* && \
+    rm -rf /tmp/*
 
 # Create a venv dir owned by unprivileged user & set up notebook in it
 # This allows non-root to install python libraries if required
@@ -33,13 +34,19 @@ RUN python3 -m venv ${VENV_DIR} && \
     # Explicitly install a new enough version of pip
     pip3 install pip==9.0.1 && \
     pip3 install --no-cache-dir \
-         jupyterlab==1.0.4 nbrsessionproxy==0.6.1 && \
-    jupyter serverextension enable --sys-prefix --py nbrsessionproxy && \
-    jupyter nbextension install    --sys-prefix --py nbrsessionproxy && \
-    jupyter nbextension enable     --sys-prefix --py nbrsessionproxy
+         jupyterlab==1.0.4 jupyter-rsession-proxy==1.0b6 && \
+    wget https://nodejs.org/dist/v10.16.1/node-v10.16.1-linux-x64.tar.xz && \
+    xz -d node-v10.16.1-linux-x64.tar.xz && \
+    tar xvf node-v10.16.1-linux-x64.tar && \
+    export PATH=/home/rstudio/node-v10.16.1-linux-x64/bin:$PATH && \
+    jupyter labextension install @jupyter-widgets/jupyterlab-manager && \
+    jupyter labextension install jupyterlab-drawio && \
+    rm -rf node-v10.16.1-linux-x64* && \
+    rm -rf /tmp/*
 
 RUN R --quiet -e "devtools::install_github('IRkernel/IRkernel')" && \
-    R --quiet -e "IRkernel::installspec(prefix='${VENV_DIR}')"
+    R --quiet -e "IRkernel::installspec(prefix='${VENV_DIR}')" && \
+    rm -rf /tmp/*
 
 EXPOSE 8888
 CMD ["jupyter", "lab","--ip=0.0.0.0", "--no-browser"]
